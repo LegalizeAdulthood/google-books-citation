@@ -1,0 +1,21 @@
+{
+    "author": "Richard Thomson <legalize@xmission.com> (http://LegalizeAdulthood.wordpress.com)",
+    "name": "google-books-citation",
+    "version": "1.0.0",
+    "description":
+        "Given a google books URL on the command-line, outputs a Terminals wiki citation template for the issue and page indicated by the URL."
+    "license": "GPL-3.0",
+    "files": ["citation.js", "cite.bat" ],
+    "repository": {
+        "type": "git",
+        "url": "http:/github.com/LegalizeAdulthood/google-books-citation.git"
+    },
+    "dependencies": {
+        "cheerio": "0.13.1",
+        "moment": "2.5.1",
+        "request": "2.33.0"
+    },
+    "bugs": {
+        "url": "http://github.com/LegalizeAdulthood/google-books-citation/issues"
+    }
+}
