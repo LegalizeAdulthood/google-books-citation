@@ -3,7 +3,7 @@
     "name": "google-books-citation",
     "version": "1.0.0",
     "description":
-        "Given a google books URL on the command-line, outputs a Terminals wiki citation template for the issue and page indicated by the URL."
+        "Given a google books URL on the command-line, outputs a Terminals wiki citation template for the issue and page indicated by the URL.",
     "license": "GPL-3.0",
     "files": ["citation.js", "cite.bat" ],
     "repository": {
