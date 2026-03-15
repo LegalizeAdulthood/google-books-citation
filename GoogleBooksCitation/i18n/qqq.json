@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"LegalizeAdulthood"
+		]
+	},
+	"googlebooks-citation-desc": "{{desc|name=GoogleBooksCitation|url=https://github.com/LegalizeAdulthood/google-books-citation}}",
+	"googlebooks-citation-error-no-url": "Error message shown when the <googlebooks> tag is used without providing a URL.",
+	"googlebooks-citation-error-fetch": "Error message shown when the extension cannot fetch the HTML content from the given Google Books URL."
+}

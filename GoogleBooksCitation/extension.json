@@ -1,0 +1,25 @@
+{
+	"name": "GoogleBooksCitation",
+	"version": "1.0.0",
+	"author": "LegalizeAdulthood",
+	"url": "https://github.com/LegalizeAdulthood/google-books-citation",
+	"descriptionmsg": "googlebooks-citation-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "parserhook",
+	"requires": {
+		"MediaWiki": ">= 1.31.0"
+	},
+	"AutoloadClasses": {
+		"GoogleBooksCitationHooks": "includes/GoogleBooksCitationHooks.php",
+		"GoogleBooksCitationParser": "includes/GoogleBooksCitationParser.php"
+	},
+	"Hooks": {
+		"ParserFirstCallInit": "GoogleBooksCitationHooks::onParserFirstCallInit"
+	},
+	"MessagesDirs": {
+		"GoogleBooksCitation": [
+			"i18n"
+		]
+	},
+	"manifest_version": 1
+}

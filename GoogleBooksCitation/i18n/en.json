@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"LegalizeAdulthood"
+		]
+	},
+	"googlebooks-citation-desc": "Generates citation wikitext from a Google Books URL.",
+	"googlebooks-citation-error-no-url": "GoogleBooksCitation error: no URL provided.",
+	"googlebooks-citation-error-fetch": "GoogleBooksCitation error: could not fetch the Google Books page."
+}
