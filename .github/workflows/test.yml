@@ -96,7 +96,7 @@ jobs:
       - name: Verify MediaWiki version
         run: |
           cd mediawiki-1.31.0
-          VERSION=$(php -r "require 'includes/DefaultSettings.php'; echo \$wgVersion;" 2>/dev/null || php -r "require 'includes/Defines.php'; require 'includes/DefaultSettings.php'; echo \$wgVersion;" 2>/dev/null || grep -oP 'wgVersion\s*=\s*.\K[^'"'"'";]+' includes/DefaultSettings.php || true)
+          VERSION=$(grep -oP "wgVersion\s*=\s*'\K[^']+" includes/DefaultSettings.php || true)
           echo "MediaWiki version: $VERSION"
           if [[ ! "$VERSION" =~ ^1\.31 ]]; then
             echo "ERROR: MediaWiki version is $VERSION, expected 1.31.x"
