@@ -15,11 +15,9 @@ class GoogleBooksCitationParser {
 			return false;
 		}
 
-		$publication = '';
-		$date = '';
-		$this->parseHtml( $html, $publication, $date );
+		$result = $this->parseHtml( $html );
 
-		return $this->formatCitation( $url, $publication, $date );
+		return $this->formatCitation( $url, $result['publication'], $result['date'] );
 	}
 
 	/**
@@ -42,10 +40,9 @@ class GoogleBooksCitationParser {
 	 *   date        = text of the <span> inside h1.gb-volume-title
 	 *
 	 * @param string $html Raw HTML
-	 * @param string &$publication Receives the publication name
-	 * @param string &$date Receives the formatted date
+	 * @return array Associative array with 'publication' and 'date' keys
 	 */
-	protected function parseHtml( $html, &$publication, &$date ) {
+	protected function parseHtml( $html ) {
 		libxml_use_internal_errors( true );
 
 		$doc = new DOMDocument();
@@ -58,9 +55,7 @@ class GoogleBooksCitationParser {
 		// Find h1.gb-volume-title
 		$nodes = $xpath->query( "//h1[contains(concat(' ', normalize-space(@class), ' '), ' gb-volume-title ')]" );
 		if ( $nodes->length === 0 ) {
-			$publication = '';
-			$date = '';
-			return;
+			return [ 'publication' => '', 'date' => '' ];
 		}
 
 		$h1 = $nodes->item( 0 );
@@ -83,6 +78,8 @@ class GoogleBooksCitationParser {
 		} else {
 			$date = $rawDate;
 		}
+
+		return [ 'publication' => $publication, 'date' => $date ];
 	}
 
 	/**

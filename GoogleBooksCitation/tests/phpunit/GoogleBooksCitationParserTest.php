@@ -33,12 +33,10 @@ HTML;
 		$method = new ReflectionMethod( GoogleBooksCitationParser::class, 'parseHtml' );
 		$method->setAccessible( true );
 
-		$publication = '';
-		$date = '';
-		$method->invoke( $parser, $html, $publication, $date );
+		$result = $method->invoke( $parser, $html );
 
-		$this->assertEquals( 'Popular Science', $publication );
-		$this->assertEquals( 'January 1, 2020', $date );
+		$this->assertEquals( 'Popular Science', $result['publication'] );
+		$this->assertEquals( 'January 1, 2020', $result['date'] );
 	}
 
 	/**
@@ -58,12 +56,10 @@ HTML;
 		$method = new ReflectionMethod( GoogleBooksCitationParser::class, 'parseHtml' );
 		$method->setAccessible( true );
 
-		$publication = '';
-		$date = '';
-		$method->invoke( $parser, $html, $publication, $date );
+		$result = $method->invoke( $parser, $html );
 
-		$this->assertEquals( 'Test Publication', $publication );
-		$this->assertEquals( '', $date );
+		$this->assertEquals( 'Test Publication', $result['publication'] );
+		$this->assertEquals( '', $result['date'] );
 	}
 
 	/**
@@ -83,12 +79,10 @@ HTML;
 		$method = new ReflectionMethod( GoogleBooksCitationParser::class, 'parseHtml' );
 		$method->setAccessible( true );
 
-		$publication = '';
-		$date = '';
-		$method->invoke( $parser, $html, $publication, $date );
+		$result = $method->invoke( $parser, $html );
 
-		$this->assertEquals( '', $publication );
-		$this->assertEquals( '', $date );
+		$this->assertEquals( '', $result['publication'] );
+		$this->assertEquals( '', $result['date'] );
 	}
 
 	/**
@@ -101,12 +95,10 @@ HTML;
 		$method = new ReflectionMethod( GoogleBooksCitationParser::class, 'parseHtml' );
 		$method->setAccessible( true );
 
-		$publication = '';
-		$date = '';
-		$method->invoke( $parser, $html, $publication, $date );
+		$result = $method->invoke( $parser, $html );
 
-		$this->assertEquals( 'Broken HTML', $publication );
-		$this->assertEquals( 'March 5, 2019', $date );
+		$this->assertEquals( 'Broken HTML', $result['publication'] );
+		$this->assertEquals( 'March 5, 2019', $result['date'] );
 	}
 
 	/**
