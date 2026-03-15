@@ -46,9 +46,13 @@ class GoogleBooksCitationParser {
 	 * @param string &$date Receives the formatted date
 	 */
 	protected function parseHtml( $html, &$publication, &$date ) {
+		libxml_use_internal_errors( true );
+
 		$doc = new DOMDocument();
-		// Suppress warnings from malformed HTML
-		@$doc->loadHTML( $html );
+		$doc->loadHTML( $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
+
+		libxml_clear_errors();
+
 		$xpath = new DOMXPath( $doc );
 
 		// Find h1.gb-volume-title
