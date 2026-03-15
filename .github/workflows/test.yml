@@ -1,0 +1,217 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+name: Test GoogleBooksCitation Extension
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }} - MW 1.31
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php: ['7.0', '7.1', '7.2', '7.3', '7.4']
+        include:
+          - php: '7.0'
+            coverage: true
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: mediawiki
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout extension
+        uses: actions/checkout@v3
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, intl, mysql
+          coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
+          tools: composer
+
+      - name: Cache MediaWiki
+        id: cache-mediawiki
+        uses: actions/cache@v3
+        with:
+          path: mediawiki-1.31.0
+          key: mediawiki-1.31.0-php-${{ matrix.php }}-${{ runner.os }}
+
+      - name: Download MediaWiki 1.31.0
+        if: steps.cache-mediawiki.outputs.cache-hit != 'true'
+        run: |
+          wget https://releases.wikimedia.org/mediawiki/1.31/mediawiki-1.31.0.tar.gz
+          tar -xzf mediawiki-1.31.0.tar.gz
+          rm mediawiki-1.31.0.tar.gz
+
+      - name: Move extension to MediaWiki extensions directory
+        run: |
+          mkdir -p mediawiki-1.31.0/extensions/GoogleBooksCitation
+          rsync -av --exclude=node_modules --exclude=vendor GoogleBooksCitation/ mediawiki-1.31.0/extensions/GoogleBooksCitation/
+
+      - name: Install Composer dependencies for MediaWiki
+        run: |
+          cd mediawiki-1.31.0
+          composer config audit.block-insecure false || true
+          composer install --no-progress --no-suggest --no-plugins --no-scripts --ignore-platform-req=composer-plugin-api
+          if [ -d vendor/jetbrains/phpstorm-stubs ] && [ ! -f vendor/jetbrains/phpstorm-stubs/PhpStormStubsMap.php ]; then
+            echo '<?php' > vendor/jetbrains/phpstorm-stubs/PhpStormStubsMap.php
+          fi
+          composer dump-autoload --no-plugins --no-scripts
+
+      - name: Install MediaWiki
+        run: |
+          cd mediawiki-1.31.0
+          php maintenance/install.php \
+            --dbtype mysql \
+            --dbserver 127.0.0.1 \
+            --dbname mediawiki \
+            --dbuser root \
+            --dbpass root \
+            --server "http://localhost:8080" \
+            --scriptpath "" \
+            --pass Admin123456 \
+            TestWiki \
+            Admin
+
+          echo "wfLoadExtension( 'GoogleBooksCitation' );" >> LocalSettings.php
+          php maintenance/update.php --quick
+
+      - name: Verify MediaWiki version
+        run: |
+          cd mediawiki-1.31.0
+          VERSION=$(php -r "require 'includes/DefaultSettings.php'; echo \$wgVersion;" 2>/dev/null || php -r "require 'includes/Defines.php'; require 'includes/DefaultSettings.php'; echo \$wgVersion;" 2>/dev/null || grep -oP 'wgVersion\s*=\s*.\K[^'"'"'";]+' includes/DefaultSettings.php || true)
+          echo "MediaWiki version: $VERSION"
+          if [[ ! "$VERSION" =~ ^1\.31 ]]; then
+            echo "ERROR: MediaWiki version is $VERSION, expected 1.31.x"
+            exit 1
+          fi
+          echo "OK Confirmed MediaWiki 1.31"
+
+      - name: Run PHPUnit tests
+        run: |
+          cd mediawiki-1.31.0
+          export MW_INSTALL_PATH=$(pwd)
+          php tests/phpunit/phpunit.php \
+            --group GoogleBooksCitation \
+            extensions/GoogleBooksCitation/tests/phpunit/
+
+      - name: Run JavaScript tests
+        run: |
+          cd GoogleBooksCitation
+          npm install
+          npm test
+
+      - name: Upload code coverage
+        if: matrix.coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./mediawiki-1.31.0/coverage.xml
+          flags: php
+
+      - name: Clean up cached directory
+        if: always()
+        run: rm -f mediawiki-1.31.0/LocalSettings.php
+
+  code-style:
+    name: Code Style
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout extension
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: mbstring
+
+      - name: Run code style checks
+        run: |
+          cd GoogleBooksCitation
+          composer config audit.block-insecure false || true
+          composer install --no-progress
+          composer test
+
+  integration-test:
+    name: Integration Test - MW 1.31.0
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout extension
+        uses: actions/checkout@v3
+
+      - name: Setup PHP 7.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.2'
+          extensions: mbstring, intl, sqlite3
+
+      - name: Download MediaWiki 1.31.0
+        run: |
+          wget https://releases.wikimedia.org/mediawiki/1.31/mediawiki-1.31.0.tar.gz
+          tar -xzf mediawiki-1.31.0.tar.gz
+          rm mediawiki-1.31.0.tar.gz
+
+      - name: Move extension and install
+        run: |
+          mkdir -p mediawiki-1.31.0/extensions/GoogleBooksCitation
+          rsync -av --exclude=node_modules --exclude=vendor GoogleBooksCitation/ mediawiki-1.31.0/extensions/GoogleBooksCitation/
+          cd mediawiki-1.31.0
+          composer config audit.block-insecure false || true
+          composer install --no-dev --no-plugins --no-scripts --ignore-platform-req=composer-plugin-api
+          if [ -d vendor/jetbrains/phpstorm-stubs ] && [ ! -f vendor/jetbrains/phpstorm-stubs/PhpStormStubsMap.php ]; then
+            echo '<?php' > vendor/jetbrains/phpstorm-stubs/PhpStormStubsMap.php
+          fi
+          composer dump-autoload --no-plugins --no-scripts
+
+          mkdir -p data
+          php maintenance/install.php \
+            --dbtype sqlite \
+            --dbpath $(pwd)/data \
+            --server "http://localhost" \
+            --pass Admin123456 \
+            TestWiki \
+            Admin
+
+          echo "wfLoadExtension( 'GoogleBooksCitation' );" >> LocalSettings.php
+          php maintenance/update.php --quick
+
+      - name: Test API endpoint exists
+        run: |
+          cd mediawiki-1.31.0
+          php maintenance/eval.php "
+            \$api = new ApiMain( new FauxRequest( [
+              'action' => 'googlebooks-citation',
+              'url' => 'https://books.google.com/books?id=example'
+            ] ) );
+            print 'API module registered: ' . ( \$api->getModuleManager()->getModule( 'googlebooks-citation' ) ? 'YES' : 'NO' ) . PHP_EOL;
+          "
+
+      - name: Verify extension is loaded
+        run: |
+          cd mediawiki-1.31.0
+          php maintenance/eval.php "
+            \$version = ExtensionRegistry::getInstance()->getAllThings()['GoogleBooksCitation']['version'] ?? 'NOT FOUND';
+            print 'Extension version: ' . \$version . PHP_EOL;
+            if ( \$version === 'NOT FOUND' ) {
+              exit( 1 );
+            }
+          "
