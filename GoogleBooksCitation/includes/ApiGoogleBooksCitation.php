@@ -16,6 +16,7 @@ class ApiGoogleBooksCitation extends ApiBase {
 		$this->getResult()->addValue( null, 'citation', $result );
 	}
 
+	/** @inheritDoc */
 	public function getAllowedParams() {
 		return [
 			'url' => [
@@ -33,6 +34,7 @@ class ApiGoogleBooksCitation extends ApiBase {
 		return false;
 	}
 
+	/** @inheritDoc */
 	protected function getExamplesMessages() {
 		return [
 			'action=googlebooks-citation&url=https://books.google.com/books?id=example'
