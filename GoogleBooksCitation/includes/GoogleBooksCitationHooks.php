@@ -12,6 +12,19 @@ class GoogleBooksCitationHooks {
 	}
 
 	/**
+	 * Load the toolbar module on edit pages.
+	 *
+	 * @param OutputPage $out
+	 * @param Skin $skin
+	 */
+	public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
+		$action = Action::getActionName( $out );
+		if ( $action === 'edit' || $action === 'submit' ) {
+			$out->addModules( 'ext.googleBooksCitation.toolbar' );
+		}
+	}
+
+	/**
 	 * Render the <googlebooks> tag.
 	 *
 	 * Usage: <googlebooks>https://books.google.com/books?id=...&pg=...</googlebooks>

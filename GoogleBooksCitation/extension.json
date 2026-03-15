@@ -11,15 +11,36 @@
 	},
 	"AutoloadClasses": {
 		"GoogleBooksCitationHooks": "includes/GoogleBooksCitationHooks.php",
-		"GoogleBooksCitationParser": "includes/GoogleBooksCitationParser.php"
+		"GoogleBooksCitationParser": "includes/GoogleBooksCitationParser.php",
+		"ApiGoogleBooksCitation": "includes/ApiGoogleBooksCitation.php"
+	},
+	"APIModules": {
+		"googlebooks-citation": "ApiGoogleBooksCitation"
 	},
 	"Hooks": {
-		"ParserFirstCallInit": "GoogleBooksCitationHooks::onParserFirstCallInit"
+		"ParserFirstCallInit": "GoogleBooksCitationHooks::onParserFirstCallInit",
+		"BeforePageDisplay": "GoogleBooksCitationHooks::onBeforePageDisplay"
 	},
 	"MessagesDirs": {
 		"GoogleBooksCitation": [
 			"i18n"
 		]
+	},
+	"ResourceModules": {
+		"ext.googleBooksCitation.toolbar": {
+			"scripts": [
+				"resources/ext.googleBooksCitation.toolbar.js"
+			],
+			"dependencies": [
+				"mediawiki.api",
+				"jquery.textSelection"
+			],
+			"messages": [
+				"googlebooks-citation-toolbar-button",
+				"googlebooks-citation-toolbar-prompt",
+				"googlebooks-citation-error-fetch"
+			]
+		}
 	},
 	"manifest_version": 1
 }
